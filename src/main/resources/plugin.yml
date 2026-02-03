@@ -1,0 +1,15 @@
+name: Dash
+version: '1.0.0'
+main: dash.Dash
+api-version: '1.21'
+author: Frxme
+description: Server admin dashboard with web interface
+commands:
+  dash:
+    description: Dash admin commands
+    usage: /dash <register>
+    permission: dash.register
+permissions:
+  dash.register:
+    description: Allows generating web registration codes
+    default: op

@@ -1,0 +1,14 @@
+# Dash Admin Dashboard Configuration
+
+# Web server port for the admin dashboard
+port: 8080
+
+# Database settings for player data tracking
+database:
+  type: sqlite
+  file: dash.db
+
+# Backup settings
+backups:
+  directory: backups
+  max-backups: 10
