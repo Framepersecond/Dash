@@ -1,8 +1,12 @@
 # Dash
 
-**Modern web-based admin dashboard for Minecraft servers**
+**Modern web-based admin dashboard for Minecraft servers (v2.0)**
 
 Dash provides a comprehensive web interface for server administration, enabling you to manage your Minecraft server from any device with a browser. Monitor server performance, manage players, execute commands, configure settings, and handle backups—all through an elegant, modern web UI.
+
+## Version
+
+- Current version: **2.0**
 
 ## Features
 
@@ -11,6 +15,7 @@ Dash provides a comprehensive web interface for server administration, enabling 
 - Historical performance graphs and analytics
 - Online player tracking with detailed profiles
 - Console log streaming with color-coded output
+- Setup-safe telemetry endpoints for panel integrations
 
 ### 👥 Player Management
 - View all players with session history and playtime
@@ -43,6 +48,19 @@ Dash provides a comprehensive web interface for server administration, enabling 
 - Broadcast messages as admin or server
 - Player freeze system for moderation
 - Web-based registration system with time-limited codes
+
+### 🔐 SSO + Approval Workflow (v2.0)
+- NeoDash bridge SSO bootstrap flow
+- Waiting room for identities pending admin approval
+- Pending bridge-user review directly in the Users page
+- Role assignment during bridge approval
+- Bridge-aware navigation and session handoff
+
+### 📱 Responsive UI Improvements (v2.0)
+- Reworked global scrolling behavior
+- Mobile-first table handling for Players, Tasks, and Audit pages
+- Overflow/clipping fixes for action menus and card actions
+- Improved mobile form layout in Settings pages
 
 ## Installation
 
@@ -110,6 +128,7 @@ backups:
 
 - Registration codes expire after 5 minutes
 - Session-based authentication with secure cookies
+- Session hardening updates in v2.0 (session-cookie behavior + explicit logout flow)
 - All actions are logged with IP tracking
 - File upload validation and path sanitization
 - Admin credentials are hashed and stored securely
