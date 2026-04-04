@@ -153,7 +153,7 @@ public class DashboardPage {
                 // --- Chart.js Pie Visuals + Numeric KPIs ---
                 "<script>\n" +
                 "if(window._dashPageTimer2){clearInterval(window._dashPageTimer2);window._dashPageTimer2=null;}\n" +
-                "var donutOpts = function(showLegend) { return {\n" +
+                "var donutOpts = function(showLegend) { if(showLegend===undefined)showLegend=true; return {\n" +
                 "  responsive: true,\n" +
                 "  maintainAspectRatio: false,\n" +
                 "  cutout: '68%',\n" +
