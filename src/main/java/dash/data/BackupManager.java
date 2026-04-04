@@ -188,23 +188,28 @@ public class BackupManager {
             return false;
 
         File restoreDir = new File(backupDir, "restore_" + System.currentTimeMillis());
+        Path restoreRoot = restoreDir.toPath().toAbsolutePath().normalize();
 
-        try {
-            java.util.zip.ZipFile zipFile = new java.util.zip.ZipFile(backup);
+        try (java.util.zip.ZipFile zipFile = new java.util.zip.ZipFile(backup)) {
             zipFile.stream().forEach(entry -> {
                 try {
-                    File destFile = new File(restoreDir, entry.getName());
+                    Path destinationPath = restoreRoot.resolve(entry.getName()).normalize();
+                    if (!destinationPath.startsWith(restoreRoot)) {
+                        throw new IOException("Invalid zip entry: " + entry.getName());
+                    }
+
+                    File destFile = destinationPath.toFile();
                     if (entry.isDirectory()) {
                         destFile.mkdirs();
                     } else {
                         destFile.getParentFile().mkdirs();
-                        Files.copy(zipFile.getInputStream(entry), destFile.toPath(),
-                                StandardCopyOption.REPLACE_EXISTING);
+                        try (InputStream inputStream = zipFile.getInputStream(entry)) {
+                            Files.copy(inputStream, destFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                        }
                     }
                 } catch (IOException ignored) {
                 }
             });
-            zipFile.close();
             return true;
         } catch (Exception e) {
             return false;
