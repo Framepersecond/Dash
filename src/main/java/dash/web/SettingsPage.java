@@ -416,8 +416,8 @@ public class SettingsPage {
                         + "\n"
                         +
                         "  });\n" +
-                        "  if(resp.ok) alert('Saved! Restart to apply.');\n" +
-                        "  else alert('Missing permission or save failed.');\n" +
+                        "  if(resp.ok) showToast('Saved! Restart to apply.', 'success');\n" +
+                        "  else showToast('Missing permission or save failed.', 'error');\n" +
                         "});\n" : "") +
                 "function parseMotd(text) { return text.replace(/&([0-9a-fk-or])/gi, ''); }\n" +
                 "document.getElementById('motd-input')?.addEventListener('input', e => document.getElementById('motd-preview').textContent = parseMotd(e.target.value));\n"
@@ -428,34 +428,34 @@ public class SettingsPage {
                         "  const resp = await fetch('/action', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},\n" +
                         "    body:'action=set_motd&motd='+encodeURIComponent(document.getElementById('motd-input').value)\n" +
                         "  });\n" +
-                        "  if(resp.ok) alert('MOTD saved! Restart to apply.');\n" +
-                        "  else alert('Missing permission or save failed.');\n" +
+                        "  if(resp.ok) showToast('MOTD saved! Restart to apply.', 'success');\n" +
+                        "  else showToast('Missing permission or save failed.', 'error');\n" +
                         "});\n" : "") +
                 (canIconWrite ? "document.getElementById('icon-upload')?.addEventListener('change', e => {\n" +
                 "  const file = e.target.files[0]; if (!file) return;\n" +
                 "  const formData = new FormData(); formData.append('file', file);\n" +
                 "  fetch('/api/upload/icon', {method:'POST', body: formData}).then(r => r.json()).then(d => {\n" +
-                "    if(d.success) { alert('Icon uploaded!'); location.reload(); } else alert('Error: '+d.error);\n" +
+                "    if(d.success) { showToast('Icon uploaded!', 'success'); if(window.dashNavigate){dashNavigate(location.pathname+location.search,false);} } else showToast('Error: '+d.error, 'error');\n" +
                 "  });\n" +
                 "});\n" : "") +
                 (canDatapacksWrite ? "document.getElementById('datapack-upload')?.addEventListener('change', e => {\n" +
                 "  const file = e.target.files[0]; if (!file) return;\n" +
                 "  const formData = new FormData(); formData.append('file', file);\n" +
                 "  fetch('/api/upload/datapack', {method:'POST', body: formData}).then(r => r.json()).then(d => {\n" +
-                "    if(d.success) { alert('Datapack uploaded!'); location.reload(); } else alert('Error: '+d.error);\n"
+                "    if(d.success) { showToast('Datapack uploaded!', 'success'); if(window.dashNavigate){dashNavigate(location.pathname+location.search,false);} } else showToast('Error: '+d.error, 'error');\n"
                 +
                 "  });\n" +
                 "});\n" : "") +
                 (canBackupsSchedule ? "document.getElementById('backup-schedule')?.addEventListener('change', e => {\n" +
                 "  fetch('/action', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},\n" +
                 "    body:'action=backup_schedule&hours='+e.target.value\n" +
-                "  }).then(() => alert('Schedule updated!'));\n" +
+                "  }).then(() => showToast('Schedule updated!', 'success'));\n" +
                 "});\n" : "") +
                 (sparkInstalled && canToolsSpark ? "document.getElementById('spark-profile')?.addEventListener('click', () => {\n" +
                         "  fetch('/action', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'},\n"
                         +
                         "    body:'action=spark_profile'\n" +
-                        "  }).then(() => alert('Spark profile started! Check console for link.'));\n" +
+                        "  }).then(() => showToast('Spark profile started! Check console for link.', 'success'));\n" +
                         "});\n" : "")
                 +
                 "</script>\n";

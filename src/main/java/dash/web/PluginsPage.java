@@ -85,14 +85,14 @@ public class PluginsPage {
                 ? "document.getElementById('plugin-upload').addEventListener('change', e => {\n" +
                         "  const file = e.target.files[0];\n" +
                         "  if (!file) return;\n" +
-                        "  if (!file.name.endsWith('.jar')) { alert('Only .jar files allowed'); return; }\n" +
+                        "  if (!file.name.endsWith('.jar')) { showToast('Only .jar files allowed', 'error'); return; }\n" +
                         "  const formData = new FormData();\n" +
                         "  formData.append('file', file);\n" +
                         "  fetch('/api/upload/plugin', {method:'POST', body: formData}).then(r => r.json()).then(d => {\n"
                         +
-                        "    if (d.success) { alert('Plugin uploaded! Restart server to load.'); location.reload(); }\n"
+                        "    if (d.success) { showToast('Plugin uploaded! Restart server to load.', 'success'); if(window.dashNavigate){dashNavigate(location.pathname+location.search,false);} }\n"
                         +
-                        "    else alert('Error: ' + d.error);\n" +
+                        "    else showToast('Error: ' + d.error, 'error');\n" +
                         "  });\n" +
                         "});\n"
                 : "";

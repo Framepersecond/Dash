@@ -45,6 +45,7 @@ public class ConsolePage {
                 "</main>\n" +
                 HtmlTemplate.statsScript() +
                 "<script>\n" +
+                "if(window._dashPageTimer){clearInterval(window._dashPageTimer);window._dashPageTimer=null;}\n" +
                 "function pollConsole() {\n" +
                 "  fetch('/api/console').then(r => r.text()).then(t => {\n" +
                 "    let el = document.getElementById('console');\n" +
@@ -55,7 +56,7 @@ public class ConsolePage {
                 "  }).catch(e => {});\n" +
                 "}\n" +
                 "pollConsole();\n" +
-                "setInterval(pollConsole, 1000);\n" +
+                "window._dashPageTimer = setInterval(pollConsole, 1000);\n" +
                 (canCommand ? "document.getElementById('cmd-input').focus();\n" : "") +
                 "</script>\n";
 
