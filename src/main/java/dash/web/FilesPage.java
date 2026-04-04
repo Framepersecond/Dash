@@ -221,8 +221,8 @@ public class FilesPage {
                 "      if (d.success) successCount++;\n" +
                 "    } catch(e) {}\n" +
                 "  }\n" +
-                "  alert('Uploaded ' + successCount + ' of ' + files.length + ' files' + (skippedCount ? (' (skipped ' + skippedCount + ' lock files)') : ''));\n" +
-                "  location.reload();\n" +
+                "  showToast('Uploaded ' + successCount + ' of ' + files.length + ' files' + (skippedCount ? (' (skipped ' + skippedCount + ' lock files)') : ''), successCount > 0 ? 'success' : 'error');\n" +
+                "  if(window.dashNavigate){dashNavigate(location.pathname+location.search,false);}\n" +
                 "}\n" +
                 "function toggleItemMenu(id, event) {\n" +
                 "  if (event) { event.preventDefault(); event.stopPropagation(); }\n" +
@@ -362,9 +362,9 @@ public class FilesPage {
                         "    headers: {'Content-Type': 'application/x-www-form-urlencoded'},\n" +
                         "    body: 'path=" + filePath + "&content=' + encodeURIComponent(content)\n" +
                         "  }).then(r => r.json()).then(d => {\n" +
-                        "    if(d.success) alert('File saved successfully!');\n" +
-                        "    else alert('Error: ' + d.error);\n" +
-                        "  }).catch(e => alert('Error saving file'));\n" +
+                        "    if(d.success) showToast('File saved successfully!', 'success');\n" +
+                        "    else showToast('Error: ' + d.error, 'error');\n" +
+                        "  }).catch(e => showToast('Error saving file', 'error'));\n" +
                         "});\n"
                 : "";
 

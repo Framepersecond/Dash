@@ -139,6 +139,7 @@ public class DashboardPage {
                 "</main>\n" +
                 HtmlTemplate.statsScript() +
                 "<script>\n" +
+                "if(window._dashPageTimer){clearInterval(window._dashPageTimer);window._dashPageTimer=null;}\n" +
                 "function pollConsole() {\n" +
                 "  fetch('/api/console').then(r => r.text()).then(t => {\n" +
                 "    let el = document.getElementById('console');\n" +
@@ -146,12 +147,13 @@ public class DashboardPage {
                 "  });\n" +
                 "}\n" +
                 "pollConsole();\n" +
-                "setInterval(() => { pollConsole(); pollStats(); }, 2000);\n" +
+                "window._dashPageTimer = setInterval(() => { pollConsole(); pollStats(); }, 2000);\n" +
                 "</script>\n" +
 
                 // --- Chart.js Pie Visuals + Numeric KPIs ---
                 "<script>\n" +
-                "const donutOpts = (showLegend=true) => ({\n" +
+                "if(window._dashPageTimer2){clearInterval(window._dashPageTimer2);window._dashPageTimer2=null;}\n" +
+                "var donutOpts = function(showLegend) { return {\n" +
                 "  responsive: true,\n" +
                 "  maintainAspectRatio: false,\n" +
                 "  cutout: '68%',\n" +
@@ -159,43 +161,43 @@ public class DashboardPage {
                 "  plugins: {\n" +
                 "    legend: { display: showLegend, labels: { color: 'rgba(255,255,255,0.62)', boxWidth: 10, boxHeight: 10 } }\n" +
                 "  }\n" +
-                "});\n" +
-                "const tpsChart = new Chart(document.getElementById('chart-tps'), {\n" +
+                "};};\n" +
+                "var tpsChart = new Chart(document.getElementById('chart-tps'), {\n" +
                 "  type:'doughnut',\n" +
                 "  data:{ labels:['TPS','Headroom'], datasets:[{ data:[20,0], backgroundColor:['rgba(16,185,129,0.95)','rgba(71,85,105,0.45)'], borderWidth:0 }] },\n" +
                 "  options: donutOpts(false)\n" +
                 "});\n" +
-                "const ramChart = new Chart(document.getElementById('chart-ram'), {\n" +
+                "var ramChart = new Chart(document.getElementById('chart-ram'), {\n" +
                 "  type:'doughnut',\n" +
                 "  data:{ labels:['Used','Free'], datasets:[{ data:[0,1], backgroundColor:['rgba(245,158,11,0.95)','rgba(71,85,105,0.45)'], borderWidth:0 }] },\n" +
                 "  options: donutOpts(true)\n" +
                 "});\n" +
-                "const chunksChart = new Chart(document.getElementById('chart-chunks'), {\n" +
+                "var chunksChart = new Chart(document.getElementById('chart-chunks'), {\n" +
                 "  type:'doughnut',\n" +
                 "  data:{ labels:['Overworld','Nether','End'], datasets:[{ data:[1,1,1], backgroundColor:['rgba(16,185,129,0.95)','rgba(244,63,94,0.95)','rgba(168,85,247,0.95)'], borderWidth:0 }] },\n" +
                 "  options: donutOpts(true)\n" +
                 "});\n" +
-                "function setText(id, val){ const el = document.getElementById(id); if(el) el.textContent = val; }\n" +
+                "function setText(id, val){ var el = document.getElementById(id); if(el) el.textContent = val; }\n" +
                 "function updateDashboardVisuals(){\n" +
                 "  Promise.all([\n" +
                 "    fetch('/api/stats').then(r => r.json()).catch(() => null),\n" +
                 "    fetch('/api/stats/history').then(r => r.json()).catch(() => [])\n" +
                 "  ]).then(([stats, history]) => {\n" +
                 "    if (stats && !stats.error) {\n" +
-                "      const tps = Math.max(0, Math.min(20, Number(stats.tps || 0)));\n" +
-                "      const ramUsed = Math.max(0, Number(stats.ram_used || 0));\n" +
-                "      const ramMax = Math.max(ramUsed + 1, Number(stats.ram_max || ramUsed + 1));\n" +
+                "      var tps = Math.max(0, Math.min(20, Number(stats.tps || 0)));\n" +
+                "      var ramUsed = Math.max(0, Number(stats.ram_used || 0));\n" +
+                "      var ramMax = Math.max(ramUsed + 1, Number(stats.ram_max || ramUsed + 1));\n" +
                 "      tpsChart.data.datasets[0].data = [tps, Math.max(0, 20 - tps)];\n" +
                 "      tpsChart.update();\n" +
                 "      ramChart.data.datasets[0].data = [ramUsed, Math.max(0, ramMax - ramUsed)];\n" +
                 "      ramChart.update();\n" +
                 "    }\n" +
                 "    if (Array.isArray(history) && history.length > 0) {\n" +
-                "      const latest = history[history.length - 1];\n" +
-                "      const mspt = Math.max(0, Number(latest.mspt || 0));\n" +
-                "      const ow = Math.max(0, Number(latest.ow || 0));\n" +
-                "      const nether = Math.max(0, Number(latest.nether || 0));\n" +
-                "      const end = Math.max(0, Number(latest.end || 0));\n" +
+                "      var latest = history[history.length - 1];\n" +
+                "      var mspt = Math.max(0, Number(latest.mspt || 0));\n" +
+                "      var ow = Math.max(0, Number(latest.ow || 0));\n" +
+                "      var nether = Math.max(0, Number(latest.nether || 0));\n" +
+                "      var end = Math.max(0, Number(latest.end || 0));\n" +
                 "      setText('kpi-mspt', mspt.toFixed(2));\n" +
                 "      setText('kpi-chunks', String(ow + nether + end));\n" +
                 "      chunksChart.data.datasets[0].data = [ow, nether, end];\n" +
@@ -204,7 +206,7 @@ public class DashboardPage {
                 "  });\n" +
                 "}\n" +
                 "updateDashboardVisuals();\n" +
-                "setInterval(updateDashboardVisuals, 5000);\n" +
+                "window._dashPageTimer2 = setInterval(updateDashboardVisuals, 5000);\n" +
                 "</script>\n";
 
         return HtmlTemplate.page("Dashboard", "/", content);

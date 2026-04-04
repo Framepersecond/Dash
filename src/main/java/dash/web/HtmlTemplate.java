@@ -128,34 +128,102 @@ public class HtmlTemplate {
                 +
                 "  body.sidebar-open .sidebar-overlay { opacity: 1; pointer-events: auto; }\n" +
                 "  .content { width: 100%; }\n" +
-                "}\n"
+                "}\n" +
+                "@keyframes dashToastIn{from{opacity:0;transform:translateX(100%)}to{opacity:1;transform:translateX(0)}}\n" +
+                "@keyframes dashToastOut{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(100%)}}\n" +
+                ".dash-toast-in{animation:dashToastIn .35s cubic-bezier(.16,1,.3,1) forwards}\n" +
+                ".dash-toast-out{animation:dashToastOut .25s cubic-bezier(.4,0,1,1) forwards}\n"
                 +
                 "</style>\n" +
                 "<script>\n" +
+                "window.showToast=function(msg,type){\n" +
+                "  var host=document.getElementById('dash-toast-host');\n" +
+                "  if(!host){host=document.createElement('div');host.id='dash-toast-host';\n" +
+                "  host.className='fixed top-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none';\n" +
+                "  document.body.appendChild(host);}\n" +
+                "  var t=document.createElement('div'),ok=type==='success';\n" +
+                "  t.className='pointer-events-auto min-w-[220px] max-w-sm rounded-xl border px-4 py-3 text-sm font-medium shadow-2xl backdrop-blur-xl dash-toast-in '+(ok?'bg-emerald-500/20 text-emerald-300 border-emerald-500/30':'bg-rose-500/20 text-rose-300 border-rose-500/30');\n" +
+                "  t.textContent=msg;\n" +
+                "  host.appendChild(t);\n" +
+                "  setTimeout(function(){t.classList.remove('dash-toast-in');t.classList.add('dash-toast-out');},3000);\n" +
+                "  setTimeout(function(){t.remove();},3300);\n" +
+                "};\n" +
                 "(function(){\n" +
-                "  let allowUnloadLogout = true;\n" +
-                "  document.addEventListener('click', function (e) {\n" +
-                "    const a = e.target && e.target.closest ? e.target.closest('a[href]') : null;\n" +
-                "    if (!a) return;\n" +
-                "    const href = a.getAttribute('href') || '';\n" +
-                "    if (!href.startsWith('javascript:') && !href.startsWith('#')) { allowUnloadLogout = false; }\n" +
-                "  }, true);\n" +
-                "  document.addEventListener('submit', function () { allowUnloadLogout = false; }, true);\n" +
-                "  window.addEventListener('beforeunload', function (e) {\n" +
-                "    if (e && e.target && e.target.activeElement && e.target.activeElement.tagName === 'A') return;\n" +
-                "    if (allowUnloadLogout && navigator.sendBeacon) { navigator.sendBeacon('/api/logout'); }\n" +
+                "  var allowUnloadLogout=true;\n" +
+                "  document.addEventListener('click',function(e){\n" +
+                "    var a=e.target&&e.target.closest?e.target.closest('a[href]'):null;\n" +
+                "    if(!a)return;var h=a.getAttribute('href')||'';\n" +
+                "    if(h.charAt(0)!=='#'&&h.indexOf('javascript:')!==0){allowUnloadLogout=false;}\n" +
+                "  },true);\n" +
+                "  document.addEventListener('submit',function(){allowUnloadLogout=false;},true);\n" +
+                "  window.addEventListener('beforeunload',function(e){\n" +
+                "    if(e&&e.target&&e.target.activeElement&&e.target.activeElement.tagName==='A')return;\n" +
+                "    if(allowUnloadLogout&&navigator.sendBeacon){navigator.sendBeacon('/api/logout');}\n" +
                 "  });\n" +
-                "  document.addEventListener('DOMContentLoaded', function () {\n" +
-                "    const menuBtn = document.getElementById('mobile-menu-toggle');\n" +
-                "    const overlay = document.getElementById('sidebar-overlay');\n" +
-                "    const close = function(){ document.body.classList.remove('sidebar-open'); };\n" +
-                "    if (menuBtn) { menuBtn.addEventListener('click', function(){ document.body.classList.toggle('sidebar-open'); }); }\n" +
-                "    if (overlay) { overlay.addEventListener('click', close); }\n" +
-                "    document.addEventListener('click', function (e) {\n" +
-                "      const a = e.target && e.target.closest ? e.target.closest('a[href]') : null;\n" +
-                "      if (a) close();\n" +
-                "    });\n" +
+                "})();\n" +
+                "document.addEventListener('click',function(e){\n" +
+                "  if(e.target.closest&&e.target.closest('#mobile-menu-toggle')){document.body.classList.toggle('sidebar-open');}\n" +
+                "  if(e.target.closest&&e.target.closest('#sidebar-overlay')){document.body.classList.remove('sidebar-open');}\n" +
+                "});\n" +
+                "(function(){\n" +
+                "  var busy=false;\n" +
+                "  function spaNav(url,push){\n" +
+                "    if(busy)return;\n" +
+                "    var el=document.getElementById('dash-content');\n" +
+                "    if(!el){window.location.href=url;return;}\n" +
+                "    busy=true;\n" +
+                "    if(window._dashStatsTimer){clearInterval(window._dashStatsTimer);window._dashStatsTimer=null;}\n" +
+                "    if(window._dashPageTimer){clearInterval(window._dashPageTimer);window._dashPageTimer=null;}\n" +
+                "    if(window._dashPageTimer2){clearInterval(window._dashPageTimer2);window._dashPageTimer2=null;}\n" +
+                "    el.style.transition='opacity 0.18s cubic-bezier(0.4,0,0.2,1),transform 0.18s cubic-bezier(0.4,0,0.2,1)';\n" +
+                "    el.style.opacity='0';el.style.transform='translateX(-30px)';\n" +
+                "    setTimeout(function(){\n" +
+                "      fetch(url,{credentials:'same-origin'}).then(function(r){\n" +
+                "        if(r.redirected){window.location.href=r.url;return null;}\n" +
+                "        if(!r.ok)throw new Error(r.status);\n" +
+                "        return r.text();\n" +
+                "      }).then(function(html){\n" +
+                "        if(!html){busy=false;return;}\n" +
+                "        var doc=new DOMParser().parseFromString(html,'text/html');\n" +
+                "        var nc=doc.getElementById('dash-content');\n" +
+                "        if(!nc){window.location.href=url;return;}\n" +
+                "        el.innerHTML=nc.innerHTML;\n" +
+                "        var scripts=el.querySelectorAll('script');\n" +
+                "        for(var i=0;i<scripts.length;i++){var o=scripts[i];\n" +
+                "          if(o.src){var s=document.createElement('script');s.src=o.src;o.parentNode.replaceChild(s,o);}\n" +
+                "          else{try{(0,eval)(o.textContent);}catch(ex){console.warn('[Dash SPA]',ex);}o.remove();}}\n" +
+                "        updateNav(url);\n" +
+                "        el.style.transition='none';el.style.opacity='0';el.style.transform='translateX(30px)';\n" +
+                "        el.offsetHeight;\n" +
+                "        el.style.transition='opacity 0.28s cubic-bezier(0,0,0.2,1),transform 0.28s cubic-bezier(0,0,0.2,1)';\n" +
+                "        el.style.opacity='1';el.style.transform='translateX(0)';\n" +
+                "        setTimeout(function(){el.style.transition='';el.style.transform='';el.style.opacity='';busy=false;},300);\n" +
+                "        el.scrollTop=0;document.body.classList.remove('sidebar-open');\n" +
+                "        var tt=doc.querySelector('title');if(tt)document.title=tt.textContent;\n" +
+                "        if(push!==false)history.pushState(null,'',url);\n" +
+                "      }).catch(function(){busy=false;window.location.href=url;});\n" +
+                "    },180);\n" +
+                "  }\n" +
+                "  function updateNav(url){\n" +
+                "    var p;try{p=new URL(url,location.origin).pathname;}catch(e){return;}\n" +
+                "    var links=document.querySelectorAll('.dash-sidebar a[href]');\n" +
+                "    var ac=['bg-primary/20','text-primary','border-primary/30'];\n" +
+                "    var ic=['text-slate-400','border-transparent','hover:bg-white/5','hover:text-white'];\n" +
+                "    for(var i=0;i<links.length;i++){var a=links[i],lp=a.getAttribute('href');\n" +
+                "      var active=lp==='/'?p==='/':p===lp||p.indexOf(lp+'/')===0;\n" +
+                "      for(var j=0;j<ac.length;j++){if(active)a.classList.add(ac[j]);else a.classList.remove(ac[j]);}\n" +
+                "      for(var j=0;j<ic.length;j++){if(active)a.classList.remove(ic[j]);else a.classList.add(ic[j]);}\n" +
+                "    }\n" +
+                "  }\n" +
+                "  document.addEventListener('click',function(e){\n" +
+                "    var a=e.target.closest?e.target.closest('a[href]'):null;\n" +
+                "    if(!a)return;var h=a.getAttribute('href');\n" +
+                "    if(!h||h.charAt(0)!=='/'||h.indexOf('/api/')===0)return;\n" +
+                "    if(a.hasAttribute('download')||a.getAttribute('target')==='_blank')return;\n" +
+                "    e.preventDefault();spaNav(h,true);\n" +
                 "  });\n" +
+                "  window.addEventListener('popstate',function(){spaNav(location.pathname+location.search,false);});\n" +
+                "  window.dashNavigate=spaNav;\n" +
                 "})();\n" +
                 "</script>\n" +
                 "</head>\n";
@@ -226,7 +294,7 @@ public class HtmlTemplate {
                 "</div>\n" +
                 "</nav>\n" +
                 "<div id=\"sidebar-overlay\" class=\"sidebar-overlay\"></div>\n" +
-                "<div class=\"flex-1 flex flex-col h-screen overflow-y-auto overflow-x-hidden w-full pb-24\">\n" +
+                "<div id=\"dash-content\" class=\"flex-1 flex flex-col h-screen overflow-y-auto overflow-x-hidden w-full pb-24\">\n" +
                 "<div class=\"md:hidden sticky top-0 z-30 flex items-center gap-3 px-4 py-3 border-b border-white/10 bg-slate-900/95 backdrop-blur\">\n"
                 +
                 "<button id=\"mobile-menu-toggle\" type=\"button\" class=\"h-9 w-9 rounded-lg border border-white/15 text-slate-200 flex items-center justify-center\">\n"
@@ -321,16 +389,18 @@ public class HtmlTemplate {
 
     public static String statsScript() {
         return "<script>\n" +
+                "if(window._dashStatsTimer){clearInterval(window._dashStatsTimer);window._dashStatsTimer=null;}\n" +
                 "function pollStats() {\n" +
                 "  fetch('/api/stats').then(r => r.json()).then(d => {\n" +
                 "    if(d.error) return;\n" +
-                "    document.getElementById('tps-val').innerText = d.tps.toFixed(1);\n" +
-                "    document.getElementById('ram-val').innerText = d.ram_used + ' / ' + d.ram_max + ' MB';\n" +
-                "    document.getElementById('uptime-val').innerText = d.uptime;\n" +
-                "  }).catch(e=>{});\n" +
+                "    var e;\n" +
+                "    e=document.getElementById('tps-val'); if(e) e.innerText = d.tps.toFixed(1);\n" +
+                "    e=document.getElementById('ram-val'); if(e) e.innerText = d.ram_used + ' / ' + d.ram_max + ' MB';\n" +
+                "    e=document.getElementById('uptime-val'); if(e) e.innerText = d.uptime;\n" +
+                "  }).catch(function(){});\n" +
                 "}\n" +
-                "setInterval(pollStats, 2000);\n" +
-                "window.onload = function() { pollStats(); };\n" +
+                "window._dashStatsTimer = setInterval(pollStats, 2000);\n" +
+                "pollStats();\n" +
                 "</script>\n";
     }
 
