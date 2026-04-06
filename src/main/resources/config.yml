@@ -1,0 +1,47 @@
+# Dash Admin Dashboard Configuration
+
+# Web server port for the admin dashboard
+port: 8080
+
+# NeoBridge slave-mode integration for NeoDash master panel
+bridge:
+  enabled: true
+  secret: "your-super-secret-key"
+  master_url: ""
+
+# Database settings for player data tracking
+database:
+  type: sqlite
+  file: dash.db
+
+# Backup settings
+backups:
+  directory: backups
+  max-backups: 10
+
+# Optional public base URL for clickable setup links (e.g. https://panel.example.com)
+panel-url: ""
+
+# Optional Discord webhook for setup-required notifications
+setup-discord-webhook-url: ""
+
+# Legacy single Discord webhook field (kept for compatibility)
+discord:
+  webhook_url: ""
+
+# Discord webhooks for event notifications
+# Each entry has a URL and a list of subscribed events:
+# audit, chat, server_start_stop, console_warnings, sso_requests
+discord-webhooks: []
+# Example:
+# discord-webhooks:
+#   - url: "https://discord.com/api/webhooks/..."
+#     events:
+#       - audit
+#       - server_start_stop
+#       - sso_requests
+
+# GitHub updater (public repository)
+updater:
+  github-repo: "Framepersecond/Dash"
+
