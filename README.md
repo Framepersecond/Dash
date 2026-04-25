@@ -6,7 +6,7 @@ Dash provides a comprehensive web interface for server administration, enabling 
 
 ## Version
 
-- Current version: **2.0**
+- Current version: **2.1.5**
 
 ## Features
 
