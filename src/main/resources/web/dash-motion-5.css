@@ -1,0 +1,388 @@
+/*!
+ * Dash Motion Engine 5.0 — style layer
+ * ---------------------------------------------------------------------------
+ * Loaded AFTER the inline <style> so it has the last word.
+ *
+ * The contract with dash-motion-5.js:
+ *
+ *   JS owns  ->  transform, opacity
+ *   CSS owns ->  colour, background, border, box-shadow, filter, blur
+ *
+ * Nothing in this file transitions transform or opacity on an element the
+ * engine can drive. That single rule is what removes the double-easing and
+ * the end-of-tween snap that made the old panel feel rapid and unfinished.
+ */
+
+/* ==========================================================================
+ * 1. Tokens — one set, aliased to both historical prefixes
+ * ======================================================================== */
+
+:root {
+  /* Durations for the CSS-owned (paint) properties only. Motion durations
+     live in the JS spring table, not here. */
+  --dash-t-tap: 90ms;
+  --dash-t-quick: 150ms;
+  --dash-t-base: 220ms;
+  --dash-t-slow: 360ms;
+
+  /* Paint easing. Standard is Material's decelerate; emphasised is the
+     iOS-style long-tail curve used for anything the eye follows. */
+  --dash-e-standard: cubic-bezier(0.2, 0, 0, 1);
+  --dash-e-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
+  --dash-e-exit: cubic-bezier(0.4, 0, 1, 1);
+
+  /* Closed-form approximations of the JS springs, for the rare CSS-only
+     element (grid-template-rows, clip-path) the engine cannot drive. */
+  --dash-e-snappy: cubic-bezier(0.22, 1, 0.36, 1);
+  --dash-e-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --dash-accent: #22d3ee;
+  --dash-accent-soft: rgba(34, 211, 238, 0.12);
+  --dash-ok: #34d399;
+
+  /* Back-compat aliases so existing rules keep resolving. */
+  --dash-dur-fast: var(--dash-t-quick);
+  --dash-dur-med: var(--dash-t-base);
+  --dash-ease-expressive: var(--dash-e-emphasized);
+  --dash-ease-spring: var(--dash-e-snappy);
+  --nd-expressive: var(--dash-e-emphasized);
+  --nd-emphasized: var(--dash-e-emphasized);
+  --nd-standard: var(--dash-e-standard);
+  --nd-quick: var(--dash-e-standard);
+  --nd-spring: var(--dash-e-snappy);
+  --nd-dur-instant: var(--dash-t-tap);
+  --nd-dur-fast: var(--dash-t-quick);
+  --nd-dur-med: var(--dash-t-base);
+  --nd-dur-slow: var(--dash-t-slow);
+  --nd-ease-material: var(--dash-e-standard);
+  --nd-ease-emphasized: var(--dash-e-emphasized);
+  --nd-ease-fluid: var(--dash-e-emphasized);
+  --nd-ease-spring: var(--dash-e-snappy);
+}
+
+/* ==========================================================================
+ * 2. Hand transform + opacity to the engine, exclusively
+ * --------------------------------------------------------------------------
+ * These selectors mirror the ones the JS interaction layer binds to. They
+ * keep their colour/shadow transitions and lose the transform ones.
+ * ======================================================================== */
+
+/* Wrapped in `:root :is(...)` purely to out-specify the inline <style> block,
+   which sets these with !important on selectors like `input[type="text"]`.
+   NOTE: only the *transition* is overridden here. We must never declare
+   `transform` or `opacity` with !important, because that would beat the
+   engine's own inline styles and freeze every animation. */
+:root :is(
+  button,
+  a[href],
+  [role="button"],
+  input, select, textarea,
+  tbody tr,
+  i[data-lucide],
+  .material-symbols-outlined,
+  nav a[href],
+  #sidebar a[href],
+  article[data-server-id],
+  .dash-hover-lift, .nd-hover-lift,
+  .dash-metric-card, .nd-metric-card,
+  .dash-product-card, .nd-product-card,
+  .dash-panel, .nd-panel,
+  .dash-select-button, .nd-select-button,
+  .dash-select-menu, .nd-select-menu,
+  .dash-select-option, .nd-select-option
+) {
+  transition-property: background-color, border-color, color, box-shadow, fill, stroke, filter, outline-color !important;
+  transition-duration: var(--dash-t-base) !important;
+  transition-timing-function: var(--dash-e-standard) !important;
+}
+
+/* The press effect is a spring now, not a CSS :active transform. The inline
+   style block's `transform: ... !important` rule has been removed from the
+   Java template for exactly this reason. */
+
+/* Entrance keyframe utilities are superseded by the engine. Leaving them
+   active caused a CSS animation and a spring to run on the same node. */
+.nd-page-enter, .nd-page-enter-down, .nd-page-exit, .nd-page-exit-fade,
+.dash-page-in, .dash-page-out, .dash-card-in, .dash-nav-in, .dash-row-in,
+.nd-slide-left, .nd-scale-in, .nd-spring-pop,
+.dash-card-micro-in, .nd-card-micro-in,
+.dash-value-flash, .dash-status-flip {
+  animation: none !important;
+}
+
+/* Elements the engine has parked must not be re-animated by a stale class. */
+[data-motion-pending] { animation: none !important; }
+
+/* Compositor hint only while something is actually in flight; the engine
+   sets and clears inline will-change, so nothing is permanently promoted. */
+
+/* ==========================================================================
+ * 3. Navigation progress
+ * ======================================================================== */
+
+#dash-progress-bar {
+  position: fixed;
+  left: 0; top: 0; right: 0;
+  height: 2px;
+  z-index: 100001;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  contain: strict;
+  transition: opacity var(--dash-t-quick) var(--dash-e-standard);
+}
+#dash-progress-bar.is-active { opacity: 1; }
+
+#dash-progress-bar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg,
+    rgba(34, 211, 238, 0.00) 0%,
+    rgba(34, 211, 238, 0.85) 45%,
+    rgba(16, 185, 129, 0.95) 60%,
+    rgba(34, 211, 238, 0.00) 100%);
+  transform: translate3d(-100%, 0, 0);
+}
+#dash-progress-bar.is-active::before {
+  animation: dashProgressSweep 1.15s var(--dash-e-emphasized) infinite;
+}
+
+@keyframes dashProgressSweep {
+  0%   { transform: translate3d(-100%, 0, 0); }
+  100% { transform: translate3d(100%, 0, 0); }
+}
+
+/* The old two-bar Material indeterminate pair is retired in favour of the
+   single sweep above; silence it if the markup is still present. */
+#dash-progress-bar .m3-progress-bar-1,
+#dash-progress-bar .m3-progress-bar-2 { display: none !important; }
+
+/* ==========================================================================
+ * 4. Deferred loading chip
+ * ======================================================================== */
+
+#dash-loading-layer {
+  position: fixed;
+  left: 50%; top: 1rem;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 999px;
+  background: rgba(8, 13, 25, 0.82);
+  box-shadow: 0 20px 44px -26px rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(18px);
+  padding: 0.5rem 0.9rem;
+  color: #dffaff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(-50%, -10px, 0);
+  transition: opacity var(--dash-t-base) var(--dash-e-standard),
+              transform var(--dash-t-slow) var(--dash-e-emphasized);
+}
+#dash-loading-layer.is-active {
+  opacity: 1;
+  transform: translate3d(-50%, 0, 0);
+}
+@media (min-width: 768px) {
+  #dash-loading-layer { left: calc(50% + 8rem); }
+}
+
+.dash-loader-dots, .nd-loader-dots { display: inline-flex; gap: 0.28rem; }
+.dash-loader-dots span, .nd-loader-dots span {
+  width: 0.36rem; height: 0.36rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #22d3ee, #10b981);
+  animation: dashLoaderDot 1.05s var(--dash-e-emphasized) infinite;
+}
+.dash-loader-dots span:nth-child(2), .nd-loader-dots span:nth-child(2) { animation-delay: 0.12s; }
+.dash-loader-dots span:nth-child(3), .nd-loader-dots span:nth-child(3) { animation-delay: 0.24s; }
+
+@keyframes dashLoaderDot {
+  0%, 75%, 100% { opacity: 0.32; transform: translate3d(0, 0, 0) scale(0.8); }
+  35%           { opacity: 1;    transform: translate3d(0, -3px, 0) scale(1); }
+}
+
+/* ==========================================================================
+ * 5. Spinners
+ * ======================================================================== */
+
+.dash-spinner, .nd-spinner,
+.dash-submit-loader, .nd-submit-loader {
+  display: inline-block;
+  width: 1em; height: 1em;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 999px;
+  animation: dashSpin 0.8s linear infinite;
+  vertical-align: -0.125em;
+}
+@keyframes dashSpin { to { transform: rotate(360deg); } }
+
+.dash-startup-loader, .nd-startup-loader { position: relative; }
+.dash-startup-loader::before, .nd-startup-loader::before,
+.dash-startup-loader::after, .nd-startup-loader::after {
+  content: "";
+  position: absolute;
+  inset: 0.2rem;
+  border-radius: inherit;
+  border: 2px solid transparent;
+  border-top-color: #22d3ee;
+  border-right-color: rgba(16, 185, 129, 0.8);
+  animation: dashSpin 1s linear infinite;
+}
+.dash-startup-loader::after, .nd-startup-loader::after {
+  inset: 0.55rem;
+  border-top-color: #fbbf24;
+  border-right-color: transparent;
+  animation-duration: 1.4s;
+  animation-direction: reverse;
+}
+
+/* ==========================================================================
+ * 6. Toasts — engine-driven, so no transition here
+ * ======================================================================== */
+
+.dash-toast, .nd-toast {
+  border: 1px solid rgba(34, 211, 238, 0.28);
+  border-radius: 0.9rem;
+  background: rgba(8, 15, 31, 0.96);
+  box-shadow: 0 18px 44px -22px rgba(0, 0, 0, 0.9);
+  color: #dffaff;
+  padding: 0.8rem 1rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  will-change: auto;
+}
+
+/* ==========================================================================
+ * 7. Surfaces
+ * ======================================================================== */
+
+.dash-metric-card, .nd-metric-card,
+.dash-product-card, .nd-product-card { position: relative; isolation: isolate; }
+
+.dash-metric-card::after, .nd-metric-card::after,
+.dash-product-card::before, .nd-product-card::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(circle at var(--dash-spot-x, 50%) var(--dash-spot-y, 0%),
+      rgba(34, 211, 238, 0.16), transparent 38%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.06), transparent 42%);
+  opacity: 0;
+  transition: opacity var(--dash-t-base) var(--dash-e-standard);
+}
+.dash-metric-card:hover::after, .nd-metric-card:hover::after,
+.dash-product-card:hover::before, .nd-product-card:hover::before { opacity: 1; }
+
+/* Data-refreshed acknowledgement: a one-shot sheen, no layout impact. */
+.dash-product-card.is-refreshing::after,
+.nd-product-card.is-refreshing::after,
+.dash-metric-card.is-refreshing::before,
+.nd-metric-card.is-refreshing::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.1) 50%, transparent 80%);
+  animation: dashSheen 0.72s var(--dash-e-emphasized);
+}
+@keyframes dashSheen {
+  0%   { transform: translate3d(-110%, 0, 0); opacity: 0; }
+  25%  { opacity: 0.9; }
+  100% { transform: translate3d(110%, 0, 0); opacity: 0; }
+}
+
+/* ==========================================================================
+ * 8. Status + skeletons
+ * ======================================================================== */
+
+.dash-status-badge::before, .nd-status-badge::before {
+  transition: box-shadow var(--dash-t-base) var(--dash-e-standard),
+              background-color var(--dash-t-base) var(--dash-e-standard);
+}
+.dash-status-badge.is-online::before, .nd-status-badge.is-online::before {
+  background: var(--dash-ok);
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.1), 0 0 14px rgba(52, 211, 153, 0.55);
+  animation: dashStatusPulse 2.4s var(--dash-e-emphasized) infinite;
+}
+@keyframes dashStatusPulse {
+  0%, 100% { opacity: 0.72; }
+  50%      { opacity: 1; }
+}
+
+.dash-skeleton, .nd-skeleton {
+  position: relative;
+  overflow: hidden;
+  color: transparent !important;
+  border-radius: 0.5rem;
+  background: linear-gradient(90deg,
+    rgba(148, 163, 184, 0.07),
+    rgba(148, 163, 184, 0.16),
+    rgba(148, 163, 184, 0.07));
+  background-size: 220% 100%;
+  animation: dashSkeleton 1.4s var(--dash-e-standard) infinite;
+}
+@keyframes dashSkeleton {
+  0%   { background-position: 130% 0; }
+  100% { background-position: -130% 0; }
+}
+
+/* ==========================================================================
+ * 9. Focus — a ring, not a tween
+ * ======================================================================== */
+
+:focus-visible {
+  outline: 2px solid var(--dash-accent);
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
+ * 10. CSS-only motion the engine cannot drive
+ * ======================================================================== */
+
+.dash-intelligence-subnav {
+  transition: grid-template-rows var(--dash-t-slow) var(--dash-e-smooth),
+              opacity var(--dash-t-base) var(--dash-e-standard);
+}
+.dash-intelligence-chevron, .nd-intelligence-chevron {
+  transition: transform var(--dash-t-base) var(--dash-e-snappy);
+}
+
+/* ==========================================================================
+ * 11. Reduced motion
+ * --------------------------------------------------------------------------
+ * The engine disables itself independently; this covers the CSS half.
+ * ======================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+  #dash-progress-bar.is-active::before,
+  .dash-loader-dots span, .nd-loader-dots span,
+  .dash-spinner, .nd-spinner,
+  .dash-submit-loader, .nd-submit-loader,
+  .dash-startup-loader::before, .nd-startup-loader::before,
+  .dash-startup-loader::after, .nd-startup-loader::after,
+  .dash-status-badge.is-online::before, .nd-status-badge.is-online::before,
+  .dash-skeleton, .nd-skeleton {
+    animation: none !important;
+  }
+  #dash-loading-layer { transition: none !important; }
+}

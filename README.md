@@ -1,318 +1,129 @@
 # Dash
 
-<div align="center">
+**Version 4.5.1 - Minecraft 26.3 support**
 
-**Modern web-based admin dashboard for Paper/Bukkit-family Minecraft servers**
+Dash is a self-hosted control surface for one Minecraft server. It combines live operations, player care, files, backups, plugins, Guardian investigations and a new evidence-driven Intelligence Center without giving up direct Paper-side control.
 
-Manage, monitor, moderate, update, and maintain your Minecraft server from any device with a browser.
+[![Version](https://img.shields.io/badge/version-4.5.1-22d3ee)](#release-status)
+[![Minecraft](https://img.shields.io/badge/Minecraft-1.21.x%20%7C%2026.2%20%7C%2026.3-22c55e)](#requirements)
+[![Java](https://img.shields.io/badge/Java-21%2B-f97316)](#requirements)
+[![License](https://img.shields.io/badge/license-BSD--3--Clause-blue)](#license)
 
-[![Release](https://img.shields.io/badge/release-v4.0-10b981?style=for-the-badge)](../../releases)
-[![Minecraft](https://img.shields.io/badge/Minecraft-1.21%2B-62b47a?style=for-the-badge)](#supported-versions)
-[![Paper](https://img.shields.io/badge/Paper%20%2F%20Bukkit-supported-22c55e?style=for-the-badge)](#supported-versions)
-[![Java](https://img.shields.io/badge/Java-21%2B-f89820?style=for-the-badge)](#supported-versions)
-[![License](https://img.shields.io/badge/License-BSD%203--Clause-blue?style=for-the-badge)](LICENSE)
+## The 4.3 Intelligence Center
 
-</div>
+Seven focused workspaces connect diagnosis, recovery and daily operation. They are backed by SQLite state, server-side authorization and real action handlers rather than display-only controls.
 
----
+| Workspace | What it gives operators |
+|---|---|
+| Investigate | Shadow Boot Lab, Root Cause Explorer, Performance Regression Radar, Plugin Resource Attribution, Guided Safe Mode and Dependency and Impact Map. |
+| Change | State Time Machine, Backup Content Explorer, Adaptive Maintenance Window and Action Guardrails. |
+| Players | Player Journey Replay, Support and Appeals Inbox, Cross-Server Player Identity and Player Experience Score. |
+| Policy | Just-in-Time Staff Access, Dual-Control Actions and Retention Center. |
+| Supply | Supply Chain Center, Config Schema Assistant and Universal Search. |
+| Reliability | World Health Center, Storage Intelligence and Service Level Dashboard. |
+| Response | Operator War Room and a configurable Public Status Page. |
 
-## Overview
+### Recovery with evidence
 
-Dash is a powerful web administration panel for Paper, Spigot, Bukkit, and compatible Minecraft servers. It gives server owners and staff a clean, responsive operations surface for monitoring performance, managing players, running console commands, browsing files, maintaining plugins, reviewing Guardian activity, handling backups, and applying GitHub-backed updates without needing direct terminal access for every task.
+- Boot a copied configuration and plugin inventory in an isolated Shadow Boot workspace without linking back to live files.
+- Correlate logs, recent configuration changes and plugin artifacts in Root Cause Explorer.
+- Capture state, compare exact changes and restore through a staged, integrity-verified transaction with a safety snapshot and rollback path.
+- Browse backup contents before restore and inspect dependency impact before changing a plugin.
+- Detect TPS, MSPT and memory regressions against retained performance samples.
 
-Dash keeps the familiar single-server workflow while making day-to-day operations smoother: secure setup, staff tools, local plugin maintenance, notifications, graph snapshots, Guardian investigation tools, mobile-friendly layouts, and polished browser interactions for desktop, tablet, and mobile operators.
+### Safer administration
 
-## Current Release
+- Require a reason, quiet hours, verified backups or approval for matching high-risk actions.
+- Grant narrow staff permissions for a bounded time and revoke them automatically.
+- Route sensitive operations through approve/reject dual control.
+- Validate editable configuration scalars against inferred types, port ranges and concurrent file changes.
+- Inspect artifact hashes, duplicate versions, signatures and dependency risk in the Supply Chain Center.
 
-- **Latest version:** `v4.0`
-- **Release date:** `2026-07-06`
-- **Release:** available from the [GitHub releases page](../../releases)
-- **License:** BSD 3-Clause
+### Player and service care
 
-## What's New in Dash 4.0
+- Replay joins, commands, moderation and support events as one player journey.
+- Track appeals and support conversations with validated type and status workflows.
+- Search literal player identities safely, including names containing `%` or `_`.
+- Combine availability, latency, incidents and player signals into experience and service-level views.
+- Coordinate incidents in durable war rooms and publish component health without exposing the admin dashboard.
 
-Dash 4.0 is the major Paper/Bukkit-family release after 3.1. It turns the dashboard into a smoother, more complete operations surface while keeping the familiar single-server workflow.
+## Complete Dashboard
 
-### Motion and Interface Polish
+| Area | Capability |
+|---|---|
+| Live operations | TPS, memory, CPU, uptime, online players, console stream and authorized command dispatch. |
+| Players | Profiles, sessions, notes, freeze, kick, ban, teleport, whitelist and inventory tools. |
+| Guardian | Cases, evidence, block and container history, incidents, suspicion scores, rollback previews and CoreProtect import. |
+| Files | Whole-row navigation, upload and folder upload, edit, rename, download and guarded delete. |
+| Backups | Verified manual backups, schedules, retention, restore points, download and delete controls. |
+| Plugins | Installed plugin view, upload workflow, Modrinth browser, inventory scan and update hints. |
+| Intelligence | Diagnosis, guarded changes, recovery, player care, supply-chain checks and coordinated incident response. |
+| Staff and delivery | Tickets, notes, notifications, Discord delivery checks, graphs and audit-friendly activity. |
+| NeoDash bridge | Signed SSO, approval-aware bridge users, TLS-aware return navigation and restart routing through NeoDash. |
 
-- Rebuilt the shared dashboard animation layer around smoother route changes and content swaps.
-- Added smoother card entrance timing, row reveals, hover lift, press feedback, status flips, and value flashes.
-- Removed the bumpy pre-exit navigation feel that made page switches feel delayed or disconnected from user input.
-- Kept reduced-motion behavior available for operators who prefer less animation.
-- Tuned interaction feedback toward transform and opacity patterns for better browser performance.
+## Evolution Since 3.1
 
-### Guardian
-
-- Shortened the Guardian activity area with a bounded table height and sticky headers.
-- Added client-side paging for Timeline, Blocks, and Containers so Guardian no longer stretches into an extremely long page.
-- Moved Guardian investigation tools out of the right-side tower into a full-width responsive tool grid.
-- Kept Selection, Status, Insights, Cases, Notes, Rollback, Regions, Rules, Retention, Purge, and CoreProtect tools available with less scrolling.
-- Added subtle row motion when paging or switching Guardian activity tabs.
-
-### Files and Uploads
-
-- File and folder rows now behave like clickable bubbles, so opening a folder no longer requires clicking only the filename.
-- File-manager actions keep the existing guarded path handling for protected server runtime files.
-- Upload, edit, rename, download, and delete flows remain inside the browser experience without forcing unnecessary navigation.
-
-### GitHub and Update Workflows
-
-- Expanded GitHub-backed update checks and release visibility for Dash.
-- Preserved staged update behavior so downloads can be applied cleanly on restart.
-- Kept rate-limit-aware update scanning and manual retry behavior.
-
-### Maintenance and Staff Tools
-
-- Continued the local maintenance split: Paper plugin work belongs in Dash, while fleet orchestration belongs in NeoDash.
-- Kept Advanced Backups, Plugin Manager, Plugin Browser, Dash Doctor, Staff, Notifications, and Graphs as plugin-local tools.
-- Improved the release narrative around Modrinth search, startup inventory scans, plugin update hints, and local server diagnostics.
-
-### NeoDash Bridge
-
-- Restart actions from NeoDash SSO sessions delegate back to NeoDash's configured start path.
-- Restart now routes into the NeoDash startup-log flow so operators can watch the server come back online.
-- Bridge sessions keep the master dashboard URL and restart callback for future lifecycle actions.
-
-### Release Metadata
-
-- Maven project version updated to `4.0`.
-- `plugin.yml` version updated to `4.0`.
-
-## Features
-
-### Real-Time Monitoring
-
-- Live server statistics, including TPS, memory usage, and CPU usage.
-- Historical performance graphs and analytics.
-- Online player tracking with detailed player profiles.
-- Live console log streaming with color-coded output.
-- Setup-safe telemetry endpoints for panel integrations.
-- Notifications, graph snapshots, and performance views for server health checks.
-
-### Guardian
-
-- Guardian activity review with bounded table heights and sticky headers.
-- Client-side paging for Timeline, Blocks, and Containers.
-- Full-width responsive investigation tool grid.
-- Subtle row motion when paging or switching Guardian tabs.
-- Selection, Status, Insights, Cases, Notes, Rollback, Regions, Rules, Retention, Purge, and CoreProtect tools.
-
-### Player and Staff Management
-
-- View all players with session history and playtime tracking.
-- Kick, ban, freeze, or teleport players from the web panel.
-- Add and manage admin notes for players.
-- View and edit player inventories and ender chests.
-- Manage the server whitelist.
-- Use Staff tools for operator workflows.
-
-### Server Configuration
-
-- Modify common server settings such as MOTD, view distance, and simulation distance.
-- Configure game rules across worlds.
-- Upload and manage the server icon.
-- Manage supported server-side settings directly from the dashboard.
-
-### Files and Uploads
-
-- Browse server files and directories directly in the browser.
-- Open files and folders from the whole row bubble for faster navigation.
-- Edit configuration files from the web interface.
-- Upload, rename, download, and delete files while staying in context.
-- Keep guarded path handling for protected server runtime files.
-- Upload and manage datapacks.
-
-### Plugin Maintenance
-
-- Keep Paper plugin maintenance local to Dash.
-- Manage installed plugin state through Plugin Manager.
-- Browse plugin options through Plugin Browser.
-- Use Modrinth search where supported.
-- Surface plugin update hints and startup inventory scan context.
-- Diagnose local server issues with Dash Doctor.
-
-### Backup System
-
-- Create manual backups instantly.
-- Use Advanced Backups for richer backup workflows.
-- Schedule automatic backups.
-- Download backup archives.
-- Configure backup retention with a maximum backup limit.
-
-### Console and Moderation Tools
-
-- Execute console commands remotely.
-- Teleport players to coordinates or to other players.
-- Broadcast messages as the server or as an admin.
-- Use the player freeze system for moderation workflows.
-- Register web admins through time-limited in-game registration codes.
-
-### SSO and Approval Workflow
-
-- NeoDash bridge SSO bootstrap flow.
-- Waiting room for identities pending admin approval.
-- Review pending bridge users directly from the Users page.
-- Assign roles during bridge approval.
-- Bridge-aware navigation and session handoff.
-- NeoDash restart handoff for configured start paths and startup-log visibility.
-
-### GitHub-Backed Updates
-
-- GitHub-backed update checks and release visibility for Dash.
-- Rate-limit-aware update scanning.
-- Manual retry support for update scans.
-- Staged downloads that can be applied cleanly on restart.
-- Clearer update workflow for server operators.
-
-### Responsive Web UI
-
-- Reworked global scrolling behavior.
-- Mobile-first handling for Players, Tasks, Audit, and Guardian pages.
-- Improved overflow and clipping behavior for action menus and card actions.
-- Better mobile form layouts in Settings pages.
-- Smooth dashboard motion system with reduced-motion support.
+- **4.0:** rebuilt route and content motion, shortened Guardian with paged activity, made file rows fully clickable, kept uploads in place and improved GitHub-backed updates and NeoDash handoff.
+- **4.1:** completed exposed beta workflows, fixed the Paper response content type that could show raw HTML, preserved sessions across refresh, hardened Doctor and backup paths, and verified every visible selection.
+- **4.2:** added the durable Operations Center with maintenance plans, incident response, shift handover, restore drills, drift, capacity forecasts, compatibility checks, permission simulation and executable recipes.
+- **4.3:** adds the 25-part Intelligence Center, generic action guardrails, transactional state recovery, public service health, deeper security validation and a smoother response-aligned animation layer.
+- **4.4:** supports every Minecraft 1.21.x release and 26.2 from one Paper plugin, removes the redundant Operations tab and focuses advanced workflows in Intelligence.
 
 ## Installation
 
-1. Download the latest `Dash.jar` from the [releases page](../../releases).
-2. Place the JAR file in your server's `plugins` folder.
-3. Restart your Minecraft server.
-4. Configure the web port in `plugins/Dash/config.yml` if needed. The default port is `8080`.
-5. Restart the server again to apply configuration changes.
-
-## Initial Setup
-
-1. Join your server as an operator.
-2. Run `/dash register` in-game to generate a registration code.
-3. Open the dashboard in your browser:
-
-   ```text
-   http://localhost:8080
-   ```
-
-   Replace `8080` with your configured port if you changed it.
-
-4. Enter the registration code and create your admin account.
-5. Log in and start managing your server through Dash.
-
-> For production use, run Dash behind HTTPS through a reverse proxy or a secure hosting panel whenever the dashboard is exposed outside your local machine.
-
-## Commands
-
-| Command | Description | Permission |
-| --- | --- | --- |
-| `/dash register` | Generates a web registration code that expires after 5 minutes. | `dash.register` |
-
-## Permissions
-
-| Permission | Description | Default |
-| --- | --- | --- |
-| `dash.register` | Allows a player to generate web registration codes. | `op` |
-
-## Configuration
-
-Edit the Dash configuration file:
-
-```text
-plugins/Dash/config.yml
-```
-
-Example configuration:
+1. Download `dash-4.4.jar` from the release page.
+2. Put it in the server's `plugins` folder.
+3. Restart once to create the configuration.
+4. Configure `plugins/Dash/config.yml` when a different port or public panel URL is needed.
+5. Run `/dash register` as an operator and complete the one-time setup link.
 
 ```yaml
-# Web server port for the admin dashboard
 port: 8080
 
-# Database settings for player data tracking
 database:
   type: sqlite
   file: dash.db
 
-# Backup settings
 backups:
   directory: backups
   max-backups: 10
 ```
 
-### Configuration Options
 
-| Option | Description | Default |
-| --- | --- | --- |
-| `port` | Web server port used by the dashboard. | `8080` |
-| `database.type` | Database backend for player data tracking. Currently supports SQLite. | `sqlite` |
-| `database.file` | SQLite database file name. | `dash.db` |
-| `backups.directory` | Directory used for backup archives. | `backups` |
-| `backups.max-backups` | Maximum number of backups to retain. | `10` |
+## Hosting behind a reverse proxy
 
-## Supported Versions
+Set `base-path` when the panel is served below a sub-path, for example `/admin`
+for `https://example.org/admin/`. Every link, form target and asset URL is then
+emitted with that prefix. Configure the proxy to strip the prefix before
+forwarding — `proxy_pass http://127.0.0.1:8080/` with the trailing slash in
+nginx, or Traefik's `StripPrefix` middleware. When `base-path` is left blank, an
+`X-Forwarded-Prefix` header sent by the proxy is honoured instead. Forward
+`Host` (or `X-Forwarded-Host`) and `X-Forwarded-Proto` so the same-origin checks
+see the browser-facing address.
 
-| Requirement | Supported |
-| --- | --- |
-| Minecraft | `1.21`, `1.21.1`, `1.21.2`, `1.21.3`, `1.21.4+` |
-| Server software | Paper, Spigot, Bukkit, and compatible forks |
-| Java | `21` or higher |
+## Security Model
 
-## Security
+- Authenticated cookies, CSRF checks, bounded request bodies and server-side permission checks protect state-changing routes.
+- Registration and handoff tokens are short-lived, replay resistant and generated with secure randomness.
+- File, archive and crash-report paths are canonicalized and protected against traversal and symlink escape.
+- Downloads and updates enforce allowlists, redirect checks, size limits and digest verification where release metadata provides it.
+- High-risk Intelligence actions support reason challenges, just-in-time rights, quiet hours and dual approval.
+- Audit records capture actor and source context without logging bridge secrets or passwords.
 
-Dash includes several built-in security measures for safer server administration:
+Run Dash behind TLS or a trusted reverse proxy and limit it to staff networks.
 
-- Registration codes expire after 5 minutes.
-- Session-based authentication with secure cookie handling.
-- Explicit logout flow and session hardening updates.
-- Admin credentials are hashed before storage.
-- File uploads are validated.
-- File paths are sanitized to reduce traversal risks.
-- File-manager actions use guarded path handling for protected server runtime files.
-- Administrative actions are logged with IP tracking.
-- Bridge approvals keep SSO identities gated behind admin review.
+## Requirements
 
-## Recommended Production Setup
+- Minecraft 1.21.x or 26.2
+- Paper, Spigot, Purpur, Bukkit or a compatible fork
+- Java 21 or newer
 
-When exposing the dashboard publicly, use a secure deployment setup:
+## Release Status
 
-- Put Dash behind HTTPS.
-- Restrict the dashboard port with a firewall where possible.
-- Use strong admin credentials.
-- Only approve bridge users you trust.
-- Keep Dash updated through the latest GitHub release.
-- Regularly download or rotate important backups.
-- Review Guardian activity, cases, rules, retention, purge, and CoreProtect tools regularly.
+Current release: **Dash 4.5.1**
 
-## Previous Release
-
-### Dash 3.1
-
-Dash 3.1 introduced the first premium motion pass, local maintenance pages, the plugin browser, notifications, staff workflow, graph snapshots, mobile navigation fixes, and NeoDash restart handoff.
-
-## Author
-
-Developed by **Frxme**.
+See [RELEASE_NOTES.md](./RELEASE_NOTES.md) for the full changelog and [API.md](./API.md) for the read-only API.
 
 ## License
 
-This project is licensed under the **BSD 3-Clause License**. See [LICENSE](LICENSE) for details.
-
----
-
-<div align="center">
-
-## Partner
-
-<a href="https://emeraldhost.de/frxme">
-  <img src="https://cdn.emeraldhost.de/branding/icon/icon.png" width="80" alt="Emerald Host Logo">
-</a>
-
-### Powered by EmeraldHost
-
-*DDoS-Protection, NVMe Performance und 99.9% Uptime.*  
-*Der Host meines Vertrauens für alle Development-Server.*
-
-<a href="https://emeraldhost.de/frxme">
-  <img src="https://img.shields.io/badge/Code-Frxme10-10b981?style=for-the-badge&logo=gift&logoColor=white&labelColor=0f172a" alt="Use code Frxme10 for 10% off">
-</a>
-
-</div>
-
----
-
-*For issues, feature requests, or contributions, please visit the [GitHub repository](../../issues).*
+BSD 3-Clause. See `LICENSE` for details.
